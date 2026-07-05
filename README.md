@@ -20,6 +20,7 @@ This repository contains:
 - Remove or cover bottom subtitles and small UI stickers
 - Auto-wrap Chinese/English mixed titles
 - Highlight key phrases such as `AI Builder` or `PM 不会消失` in vivid lime green
+- Render solid heavy Chinese title text with drop shadow, closer to editorial note-cover typography
 
 ## Example
 
@@ -89,7 +90,7 @@ The default look is modern Chinese editorial:
 
 - warm source image preserved
 - deep black/brown gradient title area
-- large white title
+- large solid heavy white title
 - vivid lime-green accent highlights
 - lime-outlined label pill
 - oversized hook line for Xiaohongshu covers

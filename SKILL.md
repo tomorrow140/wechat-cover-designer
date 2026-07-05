@@ -30,7 +30,7 @@ For image-generation requests, use this skill to define the art direction, aspec
    - Small label: topic/category, e.g. `AI 产品工作新范式`.
    - Main title: 2-4 lines, large, bold, high contrast.
    - Highlight 1-2 key phrases, e.g. `AI Builder`, `PM 不会消失`.
-5. For the default style, use a deep black/brown gradient, a lime-outlined label pill, white title text, and vivid lime emphasis.
+5. For the default style, use a deep black/brown gradient, a lime-outlined label pill, solid heavy white title text, and vivid lime emphasis.
 6. Export a high-resolution PNG. For WeChat, use 1645x700 by default.
 
 ## CLI Notes
@@ -53,6 +53,8 @@ Key options:
 - `--title`: exact title text to place on the cover.
 - `--label`: small label above the title. Defaults to `AI 产品工作新范式`.
 - `--highlight`: phrase to render in accent color. Can be repeated.
+- `--font` / `--font-index`: optional font path and collection index. By default, the CLI prefers `Hiragino Sans GB W6` when available.
+- `--text-weight` / `--emphasis-weight`: same-color faux-bold strength for solid heavy text.
 - `--remove-bottom-ratio`: fraction of image height covered by the bottom cleanup band.
 - `--dim`: overlay strength. Increase for busy backgrounds.
 

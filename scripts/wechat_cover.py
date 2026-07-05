@@ -14,7 +14,6 @@ Image = ImageDraw = ImageFont = ImageFilter = None
 
 ACCENT = (139, 230, 107)
 WHITE = (255, 255, 255)
-DEEP_SHADOW = (0, 0, 0)
 
 
 @dataclass(frozen=True)
@@ -29,6 +28,12 @@ class PlatformSpec:
     label_size: int
 
 
+@dataclass(frozen=True)
+class FontChoice:
+    path: str
+    index: int = 0
+
+
 SPECS = {
     "wechat": PlatformSpec(1645, 700, 110, 74, 1290, 52, 94, 31),
     "xiaohongshu": PlatformSpec(1200, 1600, 76, 82, 1048, 62, 104, 34),
@@ -36,22 +41,22 @@ SPECS = {
 
 
 FONT_CANDIDATES = [
-    "/System/Library/Fonts/PingFang.ttc",
-    "/System/Library/Fonts/STHeiti Medium.ttc",
-    "/System/Library/Fonts/STHeiti Light.ttc",
-    "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
-    "/System/Library/Fonts/Supplemental/Songti.ttc",
-    "/Library/Fonts/Arial Unicode.ttf",
+    FontChoice("/System/Library/Fonts/Hiragino Sans GB.ttc", 2),
+    FontChoice("/System/Library/Fonts/PingFang.ttc", 0),
+    FontChoice("/System/Library/Fonts/STHeiti Medium.ttc", 1),
+    FontChoice("/System/Library/Fonts/STHeiti Medium.ttc", 0),
+    FontChoice("/System/Library/Fonts/Supplemental/Arial Unicode.ttf", 0),
+    FontChoice("/Library/Fonts/Arial Unicode.ttf", 0),
 ]
 
 
-def find_font(explicit: str | None = None) -> str:
+def find_font(explicit: str | None = None, explicit_index: int = 0) -> FontChoice:
     if explicit:
         if Path(explicit).exists():
-            return explicit
+            return FontChoice(explicit, explicit_index)
         raise SystemExit(f"Font not found: {explicit}")
     for candidate in FONT_CANDIDATES:
-        if Path(candidate).exists():
+        if Path(candidate.path).exists():
             return candidate
     raise SystemExit("No Chinese-capable font found. Pass --font /path/to/font.ttf")
 
@@ -76,8 +81,8 @@ def ensure_pillow() -> None:
     ImageFont = PILImageFont
 
 
-def load_font(path: str, size: int) -> ImageFont.FreeTypeFont:
-    return ImageFont.truetype(path, size=size)
+def load_font(choice: FontChoice, size: int) -> ImageFont.FreeTypeFont:
+    return ImageFont.truetype(choice.path, size=size, index=choice.index)
 
 
 def center_crop_to_ratio(img: Image.Image, ratio: float) -> Image.Image:
@@ -208,15 +213,17 @@ def choose_title_font(
     title: str,
     draw: ImageDraw.ImageDraw,
     font_path: str,
+    font_index: int,
     spec: PlatformSpec,
     max_lines: int,
 ) -> tuple[ImageFont.FreeTypeFont, list[str]]:
+    choice = FontChoice(font_path, font_index)
     for size in range(spec.title_max_size, spec.title_min_size - 1, -2):
-        font = load_font(font_path, size)
+        font = load_font(choice, size)
         lines = wrap_title(title, draw, font, spec.title_max_width)
         if len(lines) <= max_lines:
             return font, lines
-    font = load_font(font_path, spec.title_min_size)
+    font = load_font(choice, spec.title_min_size)
     return font, wrap_title(title, draw, font, spec.title_max_width)
 
 
@@ -238,18 +245,41 @@ def line_fragments(line: str, highlights: Sequence[str]) -> list[tuple[str, bool
     return fragments
 
 
+def draw_solid_text(
+    draw: ImageDraw.ImageDraw,
+    xy: tuple[int, int],
+    text: str,
+    font: ImageFont.FreeTypeFont,
+    fill: tuple[int, int, int],
+    weight: int,
+    shadow_offset: tuple[int, int] = (4, 5),
+) -> None:
+    x, y = xy
+    shadow_alpha = 165
+    shadow_stroke = max(1, weight)
+    draw.text(
+        (x + shadow_offset[0], y + shadow_offset[1]),
+        text,
+        font=font,
+        fill=(0, 0, 0, shadow_alpha),
+        stroke_width=shadow_stroke,
+        stroke_fill=(0, 0, 0, shadow_alpha),
+    )
+    draw.text((x, y), text, font=font, fill=fill, stroke_width=weight, stroke_fill=fill)
+
+
 def draw_rich_line(
     draw: ImageDraw.ImageDraw,
     xy: tuple[int, int],
     line: str,
     font: ImageFont.FreeTypeFont,
     highlights: Sequence[str],
-    stroke_width: int = 2,
+    weight: int = 2,
 ) -> None:
     x, y = xy
     for fragment, marked in line_fragments(line, highlights):
         color = ACCENT if marked else WHITE
-        draw.text((x, y), fragment, font=font, fill=color, stroke_width=stroke_width, stroke_fill=DEEP_SHADOW)
+        draw_solid_text(draw, (x, y), fragment, font, color, weight)
         x += text_width(draw, fragment, font)
 
 
@@ -273,7 +303,7 @@ def draw_label_pill(
         outline=ACCENT,
         width=2,
     )
-    draw.text((x + padding_x, y + padding_y - 2), text, font=font, fill=WHITE, stroke_width=1, stroke_fill=DEEP_SHADOW)
+    draw_solid_text(draw, (x + padding_x, y + padding_y - 2), text, font, WHITE, weight=1, shadow_offset=(2, 2))
     return height
 
 
@@ -294,10 +324,10 @@ def render_cover(args: argparse.Namespace) -> Path:
         base = apply_neon_editorial_gradient(base, args.dim)
 
     draw = ImageDraw.Draw(base)
-    font_path = find_font(args.font)
-    label_font = load_font(font_path, args.label_size or spec.label_size)
-    title_font, lines = choose_title_font(args.title, draw, font_path, spec, args.max_lines)
-    emphasis_font = load_font(font_path, int(title_font.size * (1.28 if args.platform == "wechat" else 1.32)))
+    font_choice = find_font(args.font, args.font_index)
+    label_font = load_font(font_choice, args.label_size or spec.label_size)
+    title_font, lines = choose_title_font(args.title, draw, font_choice.path, font_choice.index, spec, args.max_lines)
+    emphasis_font = load_font(font_choice, int(title_font.size * (1.28 if args.platform == "wechat" else 1.32)))
     line_gap = int(title_font.size * 0.22)
     line_fonts = [emphasis_font if is_emphasis_line(line, args.highlight) and ("PM" in line or len(lines) <= 3) else title_font for line in lines]
     title_height = sum(font.size for font in line_fonts) + max(0, len(lines) - 1) * line_gap
@@ -315,7 +345,8 @@ def render_cover(args: argparse.Namespace) -> Path:
         y += draw_label_pill(draw, (x, y), args.label, label_font) + 34
 
     for line, font in zip(lines, line_fonts):
-        draw_rich_line(draw, (x, y), line, font, args.highlight, stroke_width=3 if font.size > 90 else 2)
+        weight = args.emphasis_weight if font.size > title_font.size else args.text_weight
+        draw_rich_line(draw, (x, y), line, font, args.highlight, weight=weight)
         y += font.size + line_gap
 
     underline_y = min(base.size[1] - 54, y + 16)
@@ -336,6 +367,9 @@ def parse_args(argv: Iterable[str]) -> argparse.Namespace:
     parser.add_argument("--label", default="AI 产品工作新范式")
     parser.add_argument("--highlight", action="append", default=["AI Builder", "PM 不会消失"])
     parser.add_argument("--font", help="Optional Chinese-capable font path")
+    parser.add_argument("--font-index", type=int, default=0, help="Font collection index for --font")
+    parser.add_argument("--text-weight", type=int, default=2, help="Solid faux-bold weight for normal title lines")
+    parser.add_argument("--emphasis-weight", type=int, default=3, help="Solid faux-bold weight for oversized hook lines")
     parser.add_argument("--dim", type=float, default=0.72, help="Gradient darkness, 0-0.9")
     parser.add_argument("--remove-bottom-ratio", type=float, default=0.14)
     parser.add_argument("--max-lines", type=int, default=4)

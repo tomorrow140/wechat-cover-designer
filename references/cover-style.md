@@ -6,7 +6,7 @@
 - Mood: warm interview editorial with strong note-cover impact.
 - Composition: preserve source image context; place title on left or lower-left dark gradient area.
 - Background treatment: deep black/brown translucent gradient from left/bottom, not a floating card.
-- Typography: bold Chinese sans serif; avoid decorative fonts.
+- Typography: heavy Chinese sans serif; use solid filled strokes, not hollow outline text.
 - Text color: white primary text, one vivid lime-green accent.
 - Accent color: bright lime `#8BE66B`.
 - Label: small rounded pill with translucent black fill and lime outline.
@@ -28,6 +28,13 @@ For Xiaohongshu covers, use a stronger hierarchy than WeChat:
 - Make the final conclusion line oversized and lime green when it is the hook.
 - Add a short lime underline near the bottom-left for visual anchoring.
 
+## Typography Treatment
+
+- Prefer `Hiragino Sans GB W6` on macOS, then a medium/heavy Chinese sans fallback.
+- Use same-color faux-bold stroke to thicken glyphs when a true heavy weight is unavailable.
+- Add a dark drop shadow behind text for contrast.
+- Avoid black outline strokes around white or green letters; the reference style should read as solid heavy type.
+
 ## Interview Screenshot Treatment
 
 - Keep both speakers visible if possible.
@@ -46,7 +53,7 @@ Place this exact Chinese title in large bold typography:
 
 {title}
 
-Use white text and highlight {highlight_phrases} in #8BE66B.
+Use solid heavy white text and highlight {highlight_phrases} in #8BE66B.
 Add a small rounded label pill with lime outline: {label}.
 Modern Chinese editorial style, high contrast, warm interview screenshot, oversized hook line, no extra logos, no misspelled text.
 ```
