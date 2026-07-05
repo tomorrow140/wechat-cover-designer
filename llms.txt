@@ -1,0 +1,24 @@
+# WeChat Cover Designer
+
+Repository: https://github.com/tomorrow140/wechat-cover-designer
+
+This is an agent-neutral tool for generating Chinese social media article cover images.
+
+Primary usage:
+
+```bash
+python3 scripts/wechat_cover.py --input input.png --output cover.png --title "标题" --platform wechat
+```
+
+Important files:
+
+- `AGENTS.md`: instructions for coding agents
+- `CLAUDE.md`: Claude Code-specific notes
+- `SKILL.md`: Codex skill metadata and workflow
+- `scripts/wechat_cover.py`: CLI implementation
+- `references/cover-style.md`: visual style guide
+
+Output:
+
+- `wechat`: 1645x700, 2.35:1
+- `xiaohongshu`: 1200x1600, 3:4

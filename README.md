@@ -2,11 +2,14 @@
 
 Create polished Chinese article cover images for WeChat public account posts and Xiaohongshu notes from screenshots or photos.
 
+This repository is **agent-neutral**. It can be used by Codex, Claude Code, Cursor, other coding agents, or directly from the command line.
+
 This repository contains:
 
 - A reusable Codex skill: `wechat-cover-designer`
 - A Python CLI for deterministic cover generation
 - A style guide for modern Chinese editorial covers
+- Agent instructions for non-Codex tools
 
 ## Features
 
@@ -54,6 +57,21 @@ Then ask Codex:
 
 ```text
 Use $wechat-cover-designer to create a 2.35:1 WeChat article cover from this image and title.
+```
+
+## Other Agent Usage
+
+For Claude Code, Cursor, or other coding agents:
+
+- Read [`AGENTS.md`](AGENTS.md) for generic agent instructions.
+- Read [`CLAUDE.md`](CLAUDE.md) for Claude Code-specific guidance.
+- Use [`.cursor/rules/wechat-cover-designer.mdc`](.cursor/rules/wechat-cover-designer.mdc) in Cursor.
+- Read [`llms.txt`](llms.txt) for a compact LLM-facing project summary.
+
+The stable integration surface is always the CLI:
+
+```bash
+python3 scripts/wechat_cover.py --input input.png --output cover.png --title "标题" --platform wechat
 ```
 
 ## Recommended Use Cases

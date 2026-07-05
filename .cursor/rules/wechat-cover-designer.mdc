@@ -1,0 +1,21 @@
+---
+description: Use this rule when creating or editing WeChat/Xiaohongshu cover images with this repository.
+globs:
+  - "**/*.py"
+  - "**/*.md"
+alwaysApply: false
+---
+
+# WeChat Cover Designer
+
+Use `scripts/wechat_cover.py` as the stable CLI interface.
+
+For WeChat covers, generate `1645x700` (`2.35:1`) images with:
+
+```bash
+python3 scripts/wechat_cover.py --input input.png --output cover.png --title "标题" --platform wechat
+```
+
+Follow `references/cover-style.md` for visual changes. Preserve the warm editorial style, dark gradient, large Chinese title, and green accent highlight.
+
+Keep `SKILL.md` for Codex compatibility, but do not make the project depend on Codex-specific runtime features.
