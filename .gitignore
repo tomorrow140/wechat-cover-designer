@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.DS_Store
+*.png
+*.jpg
+*.jpeg
+*.webp
+!assets/*.png
+!assets/*.jpg
+!assets/*.jpeg
+!assets/*.webp

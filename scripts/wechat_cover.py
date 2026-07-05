@@ -9,13 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Sequence
 
-try:
-    from PIL import Image, ImageDraw, ImageFont, ImageFilter
-except ImportError as exc:  # pragma: no cover - exercised by users without Pillow
-    raise SystemExit(
-        "Pillow is required. Install with `python3 -m pip install pillow`, "
-        "or run with Codex bundled Python."
-    ) from exc
+Image = ImageDraw = ImageFont = ImageFilter = None
 
 
 ACCENT = (16, 163, 127)
@@ -60,6 +54,26 @@ def find_font(explicit: str | None = None) -> str:
         if Path(candidate).exists():
             return candidate
     raise SystemExit("No Chinese-capable font found. Pass --font /path/to/font.ttf")
+
+
+def ensure_pillow() -> None:
+    global Image, ImageDraw, ImageFont, ImageFilter
+    if Image is not None:
+        return
+    try:
+        from PIL import Image as PILImage
+        from PIL import ImageDraw as PILImageDraw
+        from PIL import ImageFilter as PILImageFilter
+        from PIL import ImageFont as PILImageFont
+    except ImportError as exc:  # pragma: no cover - exercised by users without Pillow
+        raise SystemExit(
+            "Pillow is required. Install with `python3 -m pip install pillow`, "
+            "or run with Codex bundled Python."
+        ) from exc
+    Image = PILImage
+    ImageDraw = PILImageDraw
+    ImageFilter = PILImageFilter
+    ImageFont = PILImageFont
 
 
 def load_font(path: str, size: int) -> ImageFont.FreeTypeFont:
@@ -225,6 +239,7 @@ def draw_rich_line(
 
 
 def render_cover(args: argparse.Namespace) -> Path:
+    ensure_pillow()
     spec = SPECS[args.platform]
     source = Image.open(args.input).convert("RGB")
     cropped = center_crop_to_ratio(source, spec.width / spec.height)
