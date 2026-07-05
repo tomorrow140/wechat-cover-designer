@@ -16,10 +16,10 @@ This repository contains:
 - Generate WeChat public account covers in `2.35:1`
 - Generate Xiaohongshu-style vertical covers in `3:4`
 - Preserve the original image subject while adding a readable title overlay
-- Add dark translucent gradients for editorial-style readability
+- Add deep black/brown translucent gradients for editorial-style readability
 - Remove or cover bottom subtitles and small UI stickers
 - Auto-wrap Chinese/English mixed titles
-- Highlight key phrases such as `AI Builder` or `PM 不会消失`
+- Highlight key phrases such as `AI Builder` or `PM 不会消失` in vivid lime green
 
 ## Example
 
@@ -88,9 +88,11 @@ python3 scripts/wechat_cover.py --input input.png --output cover.png --title "�
 The default look is modern Chinese editorial:
 
 - warm source image preserved
-- dark gradient title area
+- deep black/brown gradient title area
 - large white title
-- green accent highlights
+- vivid lime-green accent highlights
+- lime-outlined label pill
+- oversized hook line for Xiaohongshu covers
 - minimal clutter
 - no fake logos
 

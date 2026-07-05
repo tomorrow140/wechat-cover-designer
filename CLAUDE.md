@@ -25,3 +25,4 @@ python3 scripts/wechat_cover.py \
 - Keep the CLI backward-compatible.
 - Add new layout options as flags instead of hardcoding one-off behavior.
 - Test WeChat output ratio after changes.
+- Preserve the default warm interview, deep gradient, vivid lime accent, and oversized hook-line style.

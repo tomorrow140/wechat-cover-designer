@@ -47,7 +47,9 @@ Read `references/cover-style.md` before changing layout, colors, typography, or 
 - Cover distracting subtitles, subscribe stickers, playback UI, and bottom captions.
 - Use a dark translucent gradient, not a floating card.
 - Use large white Chinese title text.
-- Highlight no more than two phrases with green `#10A37F`.
+- Highlight no more than two phrases with vivid lime `#8BE66B`.
+- Use a lime-outlined label pill for the category label.
+- For Xiaohongshu, place the title in the lower half and make the strongest hook line oversized.
 - Do not add fake logos or invented source marks.
 
 ## Validation

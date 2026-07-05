@@ -2,7 +2,7 @@
 
 Repository: https://github.com/tomorrow140/wechat-cover-designer
 
-This is an agent-neutral tool for generating Chinese social media article cover images.
+This is an agent-neutral tool for generating Chinese social media article cover images with a warm interview screenshot, deep black/brown gradient, and vivid lime editorial title style.
 
 Primary usage:
 

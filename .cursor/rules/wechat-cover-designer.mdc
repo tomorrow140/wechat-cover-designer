@@ -16,6 +16,6 @@ For WeChat covers, generate `1645x700` (`2.35:1`) images with:
 python3 scripts/wechat_cover.py --input input.png --output cover.png --title "标题" --platform wechat
 ```
 
-Follow `references/cover-style.md` for visual changes. Preserve the warm editorial style, dark gradient, large Chinese title, and green accent highlight.
+Follow `references/cover-style.md` for visual changes. Preserve the warm interview editorial style, deep black/brown gradient, large Chinese title, lime-outlined label pill, and vivid lime accent highlight.
 
 Keep `SKILL.md` for Codex compatibility, but do not make the project depend on Codex-specific runtime features.

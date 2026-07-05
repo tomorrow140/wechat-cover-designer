@@ -1,6 +1,6 @@
 ---
 name: wechat-cover-designer
-description: Create polished Chinese article cover images for WeChat public account and Xiaohongshu posts from screenshots or photos. Use when the user asks to make, edit, format, or reproduce a social-media cover style, especially 2.35:1 WeChat covers, interview/article thumbnails, Chinese editorial title overlays, gradient panels, title wrapping, or AI/product/business note covers.
+description: Create polished Chinese article cover images for WeChat public account and Xiaohongshu posts from screenshots or photos. Use when the user asks to make, edit, format, or reproduce a social-media cover style, especially 2.35:1 WeChat covers, Xiaohongshu note covers, interview/article thumbnails, warm screenshot backgrounds, vivid lime-green editorial highlights, gradient panels, title wrapping, or AI/product/business note covers.
 ---
 
 # WeChat Cover Designer
@@ -30,7 +30,8 @@ For image-generation requests, use this skill to define the art direction, aspec
    - Small label: topic/category, e.g. `AI 产品工作新范式`.
    - Main title: 2-4 lines, large, bold, high contrast.
    - Highlight 1-2 key phrases, e.g. `AI Builder`, `PM 不会消失`.
-5. Export a high-resolution PNG. For WeChat, use 1645x700 by default.
+5. For the default style, use a deep black/brown gradient, a lime-outlined label pill, white title text, and vivid lime emphasis.
+6. Export a high-resolution PNG. For WeChat, use 1645x700 by default.
 
 ## CLI Notes
 

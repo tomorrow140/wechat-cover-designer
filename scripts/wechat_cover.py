@@ -12,9 +12,9 @@ from typing import Iterable, Sequence
 Image = ImageDraw = ImageFont = ImageFilter = None
 
 
-ACCENT = (16, 163, 127)
+ACCENT = (139, 230, 107)
 WHITE = (255, 255, 255)
-MUTED = (224, 231, 226)
+DEEP_SHADOW = (0, 0, 0)
 
 
 @dataclass(frozen=True)
@@ -30,8 +30,8 @@ class PlatformSpec:
 
 
 SPECS = {
-    "wechat": PlatformSpec(1645, 700, 92, 86, 870, 44, 76, 30),
-    "xiaohongshu": PlatformSpec(1200, 1600, 78, 120, 1040, 52, 92, 34),
+    "wechat": PlatformSpec(1645, 700, 110, 74, 1290, 52, 94, 31),
+    "xiaohongshu": PlatformSpec(1200, 1600, 76, 82, 1048, 62, 104, 34),
 }
 
 
@@ -92,19 +92,33 @@ def center_crop_to_ratio(img: Image.Image, ratio: float) -> Image.Image:
     return img.crop((0, top, width, top + new_height))
 
 
-def apply_gradient(base: Image.Image, dim: float) -> Image.Image:
+def apply_neon_editorial_gradient(base: Image.Image, dim: float) -> Image.Image:
     width, height = base.size
     overlay = Image.new("RGBA", base.size, (0, 0, 0, 0))
     pixels = overlay.load()
-    max_alpha = int(255 * max(0.0, min(dim, 0.9)))
+    max_alpha = int(255 * max(0.0, min(dim, 0.92)))
     for y in range(height):
-        y_factor = max(0.0, 1.0 - y / max(height * 0.95, 1))
-        bottom_factor = (y / max(height, 1)) ** 1.8
+        vertical = (y / max(height, 1)) ** 1.65
+        top = max(0.0, 1.0 - y / max(height * 0.58, 1))
         for x in range(width):
-            x_factor = max(0.0, 1.0 - x / max(width * 0.72, 1))
-            alpha = int(max_alpha * max(x_factor, bottom_factor * 0.82, y_factor * 0.18))
+            left = max(0.0, 1.0 - x / max(width * 0.55, 1))
+            alpha = int(max_alpha * max(vertical, left * 0.78, top * 0.32))
             pixels[x, y] = (0, 0, 0, alpha)
     return Image.alpha_composite(base.convert("RGBA"), overlay)
+
+
+def compose_xiaohongshu_scene(source: Image.Image, spec: PlatformSpec, dim: float, remove_bottom_ratio: float) -> Image.Image:
+    background = center_crop_to_ratio(source, spec.width / spec.height)
+    background = background.resize((spec.width, spec.height), Image.Resampling.LANCZOS)
+    background = background.filter(ImageFilter.GaussianBlur(24)).convert("RGBA")
+    background = Image.alpha_composite(background, Image.new("RGBA", background.size, (0, 0, 0, 115)))
+
+    clean = source.crop((0, 0, source.size[0], int(source.size[1] * max(0.68, 1 - remove_bottom_ratio))))
+    foreground_width = spec.width
+    foreground_height = int(clean.size[1] * foreground_width / clean.size[0])
+    foreground = clean.resize((foreground_width, foreground_height), Image.Resampling.LANCZOS).convert("RGBA")
+    background.alpha_composite(foreground, (0, 0))
+    return apply_neon_editorial_gradient(background, dim)
 
 
 def cover_bottom_ui(img: Image.Image, ratio: float) -> Image.Image:
@@ -230,44 +244,82 @@ def draw_rich_line(
     line: str,
     font: ImageFont.FreeTypeFont,
     highlights: Sequence[str],
+    stroke_width: int = 2,
 ) -> None:
     x, y = xy
     for fragment, marked in line_fragments(line, highlights):
         color = ACCENT if marked else WHITE
-        draw.text((x, y), fragment, font=font, fill=color)
+        draw.text((x, y), fragment, font=font, fill=color, stroke_width=stroke_width, stroke_fill=DEEP_SHADOW)
         x += text_width(draw, fragment, font)
+
+
+def draw_label_pill(
+    draw: ImageDraw.ImageDraw,
+    xy: tuple[int, int],
+    text: str,
+    font: ImageFont.FreeTypeFont,
+) -> int:
+    x, y = xy
+    padding_x = 34
+    padding_y = 14
+    box = draw.textbbox((0, 0), text, font=font)
+    width = box[2] - box[0] + padding_x * 2
+    height = box[3] - box[1] + padding_y * 2
+    radius = height // 2
+    draw.rounded_rectangle(
+        (x, y, x + width, y + height),
+        radius=radius,
+        fill=(0, 0, 0, 118),
+        outline=ACCENT,
+        width=2,
+    )
+    draw.text((x + padding_x, y + padding_y - 2), text, font=font, fill=WHITE, stroke_width=1, stroke_fill=DEEP_SHADOW)
+    return height
+
+
+def is_emphasis_line(line: str, highlights: Sequence[str]) -> bool:
+    return any(phrase and phrase in line for phrase in highlights)
 
 
 def render_cover(args: argparse.Namespace) -> Path:
     ensure_pillow()
     spec = SPECS[args.platform]
     source = Image.open(args.input).convert("RGB")
-    cropped = center_crop_to_ratio(source, spec.width / spec.height)
-    base = cropped.resize((spec.width, spec.height), Image.Resampling.LANCZOS).convert("RGBA")
-    base = cover_bottom_ui(base, args.remove_bottom_ratio)
-    base = apply_gradient(base, args.dim)
+    if args.platform == "xiaohongshu":
+        base = compose_xiaohongshu_scene(source, spec, args.dim, args.remove_bottom_ratio)
+    else:
+        cropped = center_crop_to_ratio(source, spec.width / spec.height)
+        base = cropped.resize((spec.width, spec.height), Image.Resampling.LANCZOS).convert("RGBA")
+        base = cover_bottom_ui(base, args.remove_bottom_ratio)
+        base = apply_neon_editorial_gradient(base, args.dim)
 
     draw = ImageDraw.Draw(base)
     font_path = find_font(args.font)
     label_font = load_font(font_path, args.label_size or spec.label_size)
     title_font, lines = choose_title_font(args.title, draw, font_path, spec, args.max_lines)
+    emphasis_font = load_font(font_path, int(title_font.size * (1.28 if args.platform == "wechat" else 1.32)))
     line_gap = int(title_font.size * 0.22)
-    title_height = len(lines) * title_font.size + max(0, len(lines) - 1) * line_gap
-    label_height = spec.label_size + 18 if args.label else 0
+    line_fonts = [emphasis_font if is_emphasis_line(line, args.highlight) and ("PM" in line or len(lines) <= 3) else title_font for line in lines]
+    title_height = sum(font.size for font in line_fonts) + max(0, len(lines) - 1) * line_gap
+    label_height = spec.label_size + 38 if args.label else 0
 
     if args.platform == "wechat":
         y = max(spec.margin_y, spec.height - spec.margin_y - title_height - label_height)
     else:
-        y = spec.margin_y
+        lower_anchor = int(spec.height * 0.44)
+        max_y = spec.height - spec.margin_y - title_height - label_height - 96
+        y = max(spec.margin_y, min(lower_anchor, max_y))
     x = spec.margin_x
 
     if args.label:
-        draw.text((x, y), args.label, font=label_font, fill=MUTED)
-        y += spec.label_size + 18
+        y += draw_label_pill(draw, (x, y), args.label, label_font) + 34
 
-    for line in lines:
-        draw_rich_line(draw, (x, y), line, title_font, args.highlight)
-        y += title_font.size + line_gap
+    for line, font in zip(lines, line_fonts):
+        draw_rich_line(draw, (x, y), line, font, args.highlight, stroke_width=3 if font.size > 90 else 2)
+        y += font.size + line_gap
+
+    underline_y = min(base.size[1] - 54, y + 16)
+    draw.line((x, underline_y, x + 170, underline_y), fill=ACCENT, width=4)
 
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -284,7 +336,7 @@ def parse_args(argv: Iterable[str]) -> argparse.Namespace:
     parser.add_argument("--label", default="AI 产品工作新范式")
     parser.add_argument("--highlight", action="append", default=["AI Builder", "PM 不会消失"])
     parser.add_argument("--font", help="Optional Chinese-capable font path")
-    parser.add_argument("--dim", type=float, default=0.58, help="Gradient darkness, 0-0.9")
+    parser.add_argument("--dim", type=float, default=0.72, help="Gradient darkness, 0-0.9")
     parser.add_argument("--remove-bottom-ratio", type=float, default=0.14)
     parser.add_argument("--max-lines", type=int, default=4)
     parser.add_argument("--label-size", type=int)
