@@ -53,8 +53,8 @@ Key options:
 - `--title`: exact title text to place on the cover.
 - `--label`: small label above the title. Defaults to `AI 产品工作新范式`.
 - `--highlight`: phrase to render in accent color. Can be repeated.
-- `--font` / `--font-index`: optional font path and collection index. By default, the CLI prefers `Hiragino Sans GB W6` when available.
-- `--text-weight` / `--emphasis-weight`: same-color faux-bold strength for solid heavy text.
+- `--font` / `--font-index`: optional font path and collection index. By default, the CLI uses bundled `NotoSansCJKsc-Black.otf`, then system heavy Chinese fonts.
+- `--text-weight` / `--emphasis-weight`: same-color faux-bold strength for solid heavy text. Defaults are light because the bundled Black font is already heavy.
 - `--remove-bottom-ratio`: fraction of image height covered by the bottom cleanup band.
 - `--dim`: overlay strength. Increase for busy backgrounds.
 

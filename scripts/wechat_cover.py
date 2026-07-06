@@ -12,6 +12,7 @@ from typing import Iterable, Sequence
 Image = ImageDraw = ImageFont = ImageFilter = None
 
 
+SKILL_DIR = Path(__file__).resolve().parents[1]
 ACCENT = (139, 230, 107)
 WHITE = (255, 255, 255)
 
@@ -35,12 +36,13 @@ class FontChoice:
 
 
 SPECS = {
-    "wechat": PlatformSpec(1645, 700, 110, 74, 1290, 52, 94, 31),
+    "wechat": PlatformSpec(1645, 700, 110, 74, 1190, 48, 86, 31),
     "xiaohongshu": PlatformSpec(1200, 1600, 76, 82, 1048, 62, 104, 34),
 }
 
 
 FONT_CANDIDATES = [
+    FontChoice(str(SKILL_DIR / "assets/fonts/NotoSansCJKsc-Black.otf"), 0),
     FontChoice("/System/Library/Fonts/Hiragino Sans GB.ttc", 2),
     FontChoice("/System/Library/Fonts/PingFang.ttc", 0),
     FontChoice("/System/Library/Fonts/STHeiti Medium.ttc", 1),
@@ -368,8 +370,8 @@ def parse_args(argv: Iterable[str]) -> argparse.Namespace:
     parser.add_argument("--highlight", action="append", default=["AI Builder", "PM 不会消失"])
     parser.add_argument("--font", help="Optional Chinese-capable font path")
     parser.add_argument("--font-index", type=int, default=0, help="Font collection index for --font")
-    parser.add_argument("--text-weight", type=int, default=2, help="Solid faux-bold weight for normal title lines")
-    parser.add_argument("--emphasis-weight", type=int, default=3, help="Solid faux-bold weight for oversized hook lines")
+    parser.add_argument("--text-weight", type=int, default=0, help="Solid faux-bold weight for normal title lines")
+    parser.add_argument("--emphasis-weight", type=int, default=1, help="Solid faux-bold weight for oversized hook lines")
     parser.add_argument("--dim", type=float, default=0.72, help="Gradient darkness, 0-0.9")
     parser.add_argument("--remove-bottom-ratio", type=float, default=0.14)
     parser.add_argument("--max-lines", type=int, default=4)

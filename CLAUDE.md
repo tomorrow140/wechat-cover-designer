@@ -26,3 +26,4 @@ python3 scripts/wechat_cover.py \
 - Add new layout options as flags instead of hardcoding one-off behavior.
 - Test WeChat output ratio after changes.
 - Preserve the default warm interview, deep gradient, solid heavy title, vivid lime accent, and oversized hook-line style.
+- Preserve the bundled Noto Sans CJK font and its license file when copying or packaging the project.

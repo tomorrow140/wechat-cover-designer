@@ -20,7 +20,7 @@ This repository contains:
 - Remove or cover bottom subtitles and small UI stickers
 - Auto-wrap Chinese/English mixed titles
 - Highlight key phrases such as `AI Builder` or `PM 不会消失` in vivid lime green
-- Render solid heavy Chinese title text with drop shadow, closer to editorial note-cover typography
+- Render solid heavy Chinese title text with bundled `Noto Sans CJK SC Black` and drop shadow, closer to editorial note-cover typography
 
 ## Example
 
@@ -98,6 +98,10 @@ The default look is modern Chinese editorial:
 - no fake logos
 
 See [`references/cover-style.md`](references/cover-style.md) for the design guide.
+
+## Font License
+
+The bundled title font `assets/fonts/NotoSansCJKsc-Black.otf` is from Google/Adobe's Noto Sans CJK project and is distributed under the SIL Open Font License. See [`assets/fonts/NotoSansCJK-LICENSE.txt`](assets/fonts/NotoSansCJK-LICENSE.txt).
 
 ## License
 

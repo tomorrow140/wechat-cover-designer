@@ -30,8 +30,9 @@ For Xiaohongshu covers, use a stronger hierarchy than WeChat:
 
 ## Typography Treatment
 
-- Prefer `Hiragino Sans GB W6` on macOS, then a medium/heavy Chinese sans fallback.
-- Use same-color faux-bold stroke to thicken glyphs when a true heavy weight is unavailable.
+- Prefer the bundled `NotoSansCJKsc-Black.otf` for a squarer, harder title look close to the reference image.
+- Fall back to `Hiragino Sans GB W6` on macOS, then a medium/heavy Chinese sans fallback.
+- Use little or no same-color faux-bold stroke when the bundled Black font is available; reserve heavier faux-bold for thinner fallback fonts.
 - Add a dark drop shadow behind text for contrast.
 - Avoid black outline strokes around white or green letters; the reference style should read as solid heavy type.
 
