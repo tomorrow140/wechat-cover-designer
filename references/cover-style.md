@@ -9,13 +9,13 @@
 - Typography: heavy Chinese sans serif; use solid filled strokes, not hollow outline text.
 - Text color: white primary text, one vivid lime-green accent.
 - Accent color: bright lime `#8BE66B`.
-- Label: small rounded pill with translucent black fill and lime outline.
+- Label: small rounded pill with translucent black fill, smooth lime outline, compact heavy text, and minimal tracking.
 
 ## Text Hierarchy
 
 Use three levels:
 
-1. Label: 24-34 px equivalent, short category text in a lime-outlined pill.
+1. Label: 24-34 px equivalent, short category text in a lime-outlined pill. Keep it compact and heavy.
 2. Main title: 52-104 px equivalent depending on platform and title length.
 3. Emphasis line: enlarge the strongest claim, especially phrases like `PM 不会消失`.
 
@@ -35,6 +35,7 @@ For Xiaohongshu covers, use a stronger hierarchy than WeChat:
 - Use little or no same-color faux-bold stroke when the bundled Black font is available; reserve heavier faux-bold for thinner fallback fonts.
 - Add a dark drop shadow behind text for contrast.
 - Avoid black outline strokes around white or green letters; the reference style should read as solid heavy type.
+- Keep the label pill close to the reference: anti-aliased rounded border, gentle glow, compact heavy text, and no loose letter spacing.
 
 ## Interview Screenshot Treatment
 

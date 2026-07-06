@@ -92,7 +92,7 @@ The default look is modern Chinese editorial:
 - deep black/brown gradient title area
 - large solid heavy white title
 - vivid lime-green accent highlights
-- lime-outlined label pill
+- smooth lime-outlined label pill with compact heavy text
 - oversized hook line for Xiaohongshu covers
 - minimal clutter
 - no fake logos

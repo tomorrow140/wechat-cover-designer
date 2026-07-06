@@ -51,6 +51,13 @@ FONT_CANDIDATES = [
     FontChoice("/Library/Fonts/Arial Unicode.ttf", 0),
 ]
 
+LABEL_FONT_CANDIDATES = [
+    FontChoice(str(SKILL_DIR / "assets/fonts/NotoSansCJKsc-Black.otf"), 0),
+    FontChoice("/System/Library/Fonts/Hiragino Sans GB.ttc", 2),
+    FontChoice("/System/Library/Fonts/STHeiti Medium.ttc", 1),
+    FontChoice("/System/Library/Fonts/STHeiti Medium.ttc", 0),
+]
+
 
 def find_font(explicit: str | None = None, explicit_index: int = 0) -> FontChoice:
     if explicit:
@@ -61,6 +68,15 @@ def find_font(explicit: str | None = None, explicit_index: int = 0) -> FontChoic
         if Path(candidate.path).exists():
             return candidate
     raise SystemExit("No Chinese-capable font found. Pass --font /path/to/font.ttf")
+
+
+def find_label_font(explicit: str | None = None, explicit_index: int = 0) -> FontChoice:
+    if explicit:
+        return find_font(explicit, explicit_index)
+    for candidate in LABEL_FONT_CANDIDATES:
+        if Path(candidate.path).exists():
+            return candidate
+    return find_font()
 
 
 def ensure_pillow() -> None:
@@ -151,6 +167,26 @@ def text_width(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.FreeTypeFon
         return 0
     box = draw.textbbox((0, 0), text, font=font)
     return box[2] - box[0]
+
+
+def tracked_text_width(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.FreeTypeFont, tracking: int) -> int:
+    if not text:
+        return 0
+    return sum(text_width(draw, char, font) for char in text) + max(0, len(text) - 1) * tracking
+
+
+def draw_tracked_text(
+    draw: ImageDraw.ImageDraw,
+    xy: tuple[int, int],
+    text: str,
+    font: ImageFont.FreeTypeFont,
+    fill: tuple[int, int, int, int],
+    tracking: int,
+) -> None:
+    x, y = xy
+    for char in text:
+        draw.text((x, y), char, font=font, fill=fill)
+        x += text_width(draw, char, font) + tracking
 
 
 def split_long_token(token: str, draw: ImageDraw.ImageDraw, font: ImageFont.FreeTypeFont, max_width: int) -> list[str]:
@@ -286,27 +322,56 @@ def draw_rich_line(
 
 
 def draw_label_pill(
-    draw: ImageDraw.ImageDraw,
+    base: Image.Image,
     xy: tuple[int, int],
     text: str,
-    font: ImageFont.FreeTypeFont,
+    font_choice: FontChoice,
+    size: int,
+    tracking: int,
 ) -> int:
     x, y = xy
-    padding_x = 34
-    padding_y = 14
-    box = draw.textbbox((0, 0), text, font=font)
-    width = box[2] - box[0] + padding_x * 2
-    height = box[3] - box[1] + padding_y * 2
+    scale = 3
+    font = load_font(font_choice, size * scale)
+    padding_x = 34 * scale
+    padding_y = 12 * scale
+    tracking_s = tracking * scale
+    scratch = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
+    scratch_draw = ImageDraw.Draw(scratch)
+    box = scratch_draw.textbbox((0, 0), text, font=font)
+    text_width_s = tracked_text_width(scratch_draw, text, font, tracking_s)
+    text_height_s = box[3] - box[1]
+    width = text_width_s + padding_x * 2
+    height = text_height_s + padding_y * 2
+
+    layer = Image.new("RGBA", (width + 8 * scale, height + 8 * scale), (0, 0, 0, 0))
+    layer_draw = ImageDraw.Draw(layer)
+    rect = (4 * scale, 4 * scale, 4 * scale + width, 4 * scale + height)
     radius = height // 2
-    draw.rounded_rectangle(
-        (x, y, x + width, y + height),
+
+    for offset, alpha in ((3 * scale, 42), (1 * scale, 75)):
+        glow_rect = (
+            rect[0] - offset,
+            rect[1] - offset,
+            rect[2] + offset,
+            rect[3] + offset,
+        )
+        layer_draw.rounded_rectangle(glow_rect, radius=radius + offset, outline=(*ACCENT, alpha), width=scale)
+
+    layer_draw.rounded_rectangle(
+        rect,
         radius=radius,
-        fill=(0, 0, 0, 118),
-        outline=ACCENT,
-        width=2,
+        fill=(0, 0, 0, 148),
+        outline=(*ACCENT, 235),
+        width=2 * scale,
     )
-    draw_solid_text(draw, (x + padding_x, y + padding_y - 2), text, font, WHITE, weight=1, shadow_offset=(2, 2))
-    return height
+    text_x = rect[0] + padding_x
+    text_y = rect[1] + (height - text_height_s) // 2 - box[1] - scale
+    draw_tracked_text(layer_draw, (text_x + scale, text_y + scale), text, font, (0, 0, 0, 105), tracking_s)
+    draw_tracked_text(layer_draw, (text_x, text_y), text, font, (*WHITE, 255), tracking_s)
+
+    final = layer.resize((layer.size[0] // scale, layer.size[1] // scale), Image.Resampling.LANCZOS)
+    base.alpha_composite(final, (x - 4, y - 4))
+    return height // scale
 
 
 def is_emphasis_line(line: str, highlights: Sequence[str]) -> bool:
@@ -327,7 +392,7 @@ def render_cover(args: argparse.Namespace) -> Path:
 
     draw = ImageDraw.Draw(base)
     font_choice = find_font(args.font, args.font_index)
-    label_font = load_font(font_choice, args.label_size or spec.label_size)
+    label_font_choice = find_label_font(args.label_font, args.label_font_index)
     title_font, lines = choose_title_font(args.title, draw, font_choice.path, font_choice.index, spec, args.max_lines)
     emphasis_font = load_font(font_choice, int(title_font.size * (1.28 if args.platform == "wechat" else 1.32)))
     line_gap = int(title_font.size * 0.22)
@@ -344,7 +409,7 @@ def render_cover(args: argparse.Namespace) -> Path:
     x = spec.margin_x
 
     if args.label:
-        y += draw_label_pill(draw, (x, y), args.label, label_font) + 34
+        y += draw_label_pill(base, (x, y), args.label, label_font_choice, args.label_size or spec.label_size, args.label_tracking) + 34
 
     for line, font in zip(lines, line_fonts):
         weight = args.emphasis_weight if font.size > title_font.size else args.text_weight
@@ -370,6 +435,9 @@ def parse_args(argv: Iterable[str]) -> argparse.Namespace:
     parser.add_argument("--highlight", action="append", default=["AI Builder", "PM 不会消失"])
     parser.add_argument("--font", help="Optional Chinese-capable font path")
     parser.add_argument("--font-index", type=int, default=0, help="Font collection index for --font")
+    parser.add_argument("--label-font", help="Optional Chinese-capable font path for the label pill")
+    parser.add_argument("--label-font-index", type=int, default=0, help="Font collection index for --label-font")
+    parser.add_argument("--label-tracking", type=int, default=0, help="Letter spacing for the label pill")
     parser.add_argument("--text-weight", type=int, default=0, help="Solid faux-bold weight for normal title lines")
     parser.add_argument("--emphasis-weight", type=int, default=1, help="Solid faux-bold weight for oversized hook lines")
     parser.add_argument("--dim", type=float, default=0.72, help="Gradient darkness, 0-0.9")

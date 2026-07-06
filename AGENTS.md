@@ -49,7 +49,7 @@ Read `references/cover-style.md` before changing layout, colors, typography, or 
 - Use large solid heavy Chinese title text with drop shadow.
 - Prefer the bundled `assets/fonts/NotoSansCJKsc-Black.otf` unless the user supplies a specific font.
 - Highlight no more than two phrases with vivid lime `#8BE66B`.
-- Use a lime-outlined label pill for the category label.
+- Use a smooth lime-outlined label pill for the category label, with compact heavy text and minimal tracking.
 - For Xiaohongshu, place the title in the lower half and make the strongest hook line oversized.
 - Avoid black outline-only typography; the letters should look filled and heavy.
 - Do not add fake logos or invented source marks.

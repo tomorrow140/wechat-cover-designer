@@ -54,6 +54,8 @@ Key options:
 - `--label`: small label above the title. Defaults to `AI 产品工作新范式`.
 - `--highlight`: phrase to render in accent color. Can be repeated.
 - `--font` / `--font-index`: optional font path and collection index. By default, the CLI uses bundled `NotoSansCJKsc-Black.otf`, then system heavy Chinese fonts.
+- `--label-font` / `--label-font-index`: optional separate label font. By default, the label uses bundled Noto Black for a compact heavy pill label.
+- `--label-tracking`: letter spacing for the label pill.
 - `--text-weight` / `--emphasis-weight`: same-color faux-bold strength for solid heavy text. Defaults are light because the bundled Black font is already heavy.
 - `--remove-bottom-ratio`: fraction of image height covered by the bottom cleanup band.
 - `--dim`: overlay strength. Increase for busy backgrounds.
